@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+{% load projects_extra %}
+
+{% block content %}
+
+  <form action="" method="POST">
+    <div class="circle--actions--bar">
+      <div class="bounds">
+        <div class="grid-100">
+          <input class="button button-primary" type="submit" value="Save {% if form.instance.id %}Changes{% else %}Project{% endif %}">
+          {% if form.instance.id %}
+            <a class="button button-text" id="delete-project-button" href="{% url 'projects:project-delete' pk=project.pk %}">Delete Project</a>
+          {% else %}
+            <a class="button button-text" href="{% url 'projects:home' %}">Discard</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="bounds circle--page circle--article">
+      <div class="grid-70">
+        <div class="circle--article--body">
+          {% csrf_token %}
+          {{ form.non_field_errors }}
+
+          {{ form.name.errors }}
+          {{ form.name }}
+
+          {{ form.description.errors }}
+          {{ form.description }}
+        </div>
+
+        {{ position_formset.management_form }}
+        <div class="circle--project--positions">
+          <h2>Positions</h2>
+          <ul class="circle--group--list circle--clone--list">
+            {{ position_formset.non_form_errors }}
+            {% for position_form in position_formset %}
+              <li class="form-container">
+                {% if position_form.instance.pk %}{{ position_form.DELETE }}{% endif %}
+                {{ position_form.id }}
+
+                {{ position_form.role_name.errors }}
+                {{ position_form.role_name }}
+
+                {{ position_form.description.errors }}
+                {{ position_form.description }}
+
+                {{ position_form.related_skills.errors }}
+                {{ position_form.related_skills }}
+
+                {{ position_form.involvement.errors }}
+                {{ position_form.involvement }}
+
+                {% if position_form.instance.user %}
+                  <p>Assigned to {{ position_form.instance.user.userprofile.full_name }}</p>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+          <input class="button button-primary" type="submit" value="Save {% if form.instance.id %}Changes{% else %}Project{% endif %}">
+        </div>
+      </div>
+
+      <div class="grid-25 grid-push-5">
+        <div class="circle--secondary--module">
+          <h3>Project Timeline</h3>
+          {{ form.timeline.errors }}
+          {{ form.timeline }}
+        </div>
+
+        <div class="circle--secondary--module">
+          <h3>Application Requirements</h3>
+          {{ form.requirements.errors }}
+          {{ form.requirements }}
+        </div>
+
+      </div>
+    </div>
+  </form>
+
+  {% awesomplete_list %}
+
+  <script type="text/javascript">
+    Awesomplete.$$('input[data-multiple]').forEach(function (input) {
+      new Awesomplete(input, {
+        filter: function (text, input) {
+          return Awesomplete.FILTER_CONTAINS(text, input.match(/[^,]*$/)[0]);
+        },
+        replace: function (text) {
+          var before = this.input.value.match(/^.+,\s*|/)[0];
+          this.input.value = before + text + ", ";
+        }
+      });
+    });
+
+  </script>
+
+{% endblock %}
+
+{% block javascript %}
+{% load static from staticfiles %}
+    <script src="{% static "js/awesomplete.js" %}"></script>
+    <script src="{% static "js/jquery.formset.js" %}"></script>
+    <script src="{% static "js/markdownx.js" %}"></script>
+    <script type="text/javascript">
+    $(function() {
+        $('.form-container').formset({
+            prefix: '{{ position_formset.prefix }}',
+            addText: 'Add Position',
+            deleteText: 'Remove',
+            addCssClass: 'circle--clone--add',
+            deleteCssClass: 'circle--clone--remove',
+            added: function (row) {
+                Awesomplete.$$('.awesomplete').forEach(function (input) {
+                  new Awesomplete(input, {
+                  });
+                });
+                Awesomplete.$$('input[data-multiple]').forEach(function (input) {
+                  new Awesomplete(input, {
+                    filter: function (text, input) {
+                      return Awesomplete.FILTER_CONTAINS(text, input.match(/[^,]*$/)[0]);
+                    },
+                    replace: function (text) {
+                      var before = this.input.value.match(/^.+,\s*|/)[0];
+                      this.input.value = before + text + ", ";
+                    }
+                  });
+                });
+            }
+        });
+    })
+    </script>
+
+    <script src="{% static "js/sweetalert.min.js" %}"></script>
+{% endblock %}
+
+{% block css %}
+{% load static from staticfiles %}
+    <link rel="stylesheet" href="{% static "css/sweetalert.css" %}">
+    <link rel="stylesheet" href="{% static "css/awesomplete.css" %}">
+{% endblock %}

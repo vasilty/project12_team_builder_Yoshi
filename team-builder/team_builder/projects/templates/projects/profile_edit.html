@@ -1,0 +1,183 @@
+{% extends "layout.html" %}
+{% load projects_extra %}
+
+{% block content %}
+{% load static from staticfiles %}
+
+  <div class="circle--actions--bar">
+    <nav class="bounds">
+      <ul class="circle--pill--list">
+        <li><a href="applications.html">Applications</a></li>
+        <li><a class="selected" href="profile.html">Profile</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="bounds circle--page">
+    <form enctype="multipart/form-data" action="" method="POST">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="circle--page--header circle--fluid">
+          <div class="circle--fluid--cell circle--fluid--primary">
+            <h2>Profile</h2>
+          </div>
+          <div class="circle--fluid--cell circle--fluid--secondary">
+            <input type="submit" class="button button-primary icon-on-left" value="Save Changes">
+          </div>
+        </div>
+
+        <div class="grid-70">
+          {{ form.full_name.errors }}
+          {{ form.full_name }}
+          <div class="circle--article--body">
+            {{ form.biography.errors }}
+            {{ form.biography }}
+          </div>
+
+          <h2>Past Projects</h2>
+          <table class="u-full-width circle--table">
+            <thead>
+              <tr>
+                <th>Project Title</th>
+                <th class="circle--cell--right">Project Needs</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="clickable-row" data-href="project.html">
+                <td>
+                  <h3>Invoice Delivery Tool</h3>
+                </td>
+                <td class="circle--cell--right">
+                  <span class="secondary-label">Rails Developer</span>
+                </td>
+              </tr>
+              <tr class="clickable-row" data-href="project.html">
+                <td>
+                  <h3>Twitter Client</h3>
+                </td>
+                <td class="circle--cell--right">
+                  <span class="secondary-label">Designer</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid-25 grid-push-5">
+
+          <div class="circle--secondary--module">
+            <div class="circle--primary--avatar">
+
+              <div class="image-editor">
+                <!-- This is where the preview image is displayed -->
+                <div class="cropit-preview"></div>
+                <!-- This range input controls zoom -->
+                <!-- You can add additional elements here, e.g. the image icons -->
+                <input type="range" class="cropit-image-zoom-input" />
+                <!-- This is where user selects new image -->
+                <input type="file" class="cropit-image-input"/>
+                {{ form.avatar_data }}
+
+                <div class="avatar-editor-button edit-avatar">Edit Avatar</div>
+                <div class="avatar-editor-button select-image-btn">Upload Photo</div>
+                <div class="avatar-editor-button rotate-cw">Rotate</div>
+                <div class="avatar-editor-button export">Save</div>
+
+              </div>
+            </div>
+          </div>
+
+          {{ skill_formset.management_form }}
+          <div class="circle--secondary--module">
+            <h4>My Skills</h4>
+            <ul class="circle--clone--list">
+              {{ skill_formset.non_form_errors }}
+              {% for skill_form in skill_formset %}
+              <li class="form-container">
+                {% if skill_form.instance.pk %}{{ skill_form.DELETE }}{% endif %}
+                {{ skill_form.id }}
+                {{ skill_form.skill_name.errors }}
+                {{ skill_form.skill_name }}
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <div class="circle--secondary--module">
+            <h4>My Projects</h4>
+            <ul class="circle--clone--list">
+              <li>
+                <input type="text" placeholder="Project Name" />
+                <input type="text" placeholder="Project URL" />
+                <a class="circle--clone--add">Add Project</a>
+                <a class="circle--clone--remove">Remove</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+    </form>
+  </div>
+
+  {% awesomplete_list %}
+
+    <script>
+      $('.edit-avatar').on('click', function () {
+          $('.edit-avatar').hide();
+          $('.select-image-btn, .rotate-cw, .export, .cropit-image-zoom-input').show();
+      });
+
+      $(function() {
+        $('.image-editor').cropit({
+            imageState: {
+                src: '{% avatarpath user.userprofile %}'
+            }
+        });
+        $('.select-image-btn').click(function() {
+            $('.cropit-image-input').click();
+        });
+        $('.rotate-cw').click(function() {
+          $('.image-editor').cropit('rotateCW');
+        });
+        $('.export').click(function() {
+          var imageData = $('.image-editor').cropit('export');
+          $('.hidden-image-data').val(imageData);
+          $('.edit-avatar').show();
+          $('.select-image-btn, .rotate-cw, .export, .cropit-image-zoom-input').hide();
+
+        });
+      });
+    </script>
+
+
+{% endblock %}
+
+{% block javascript %}
+{% load static from staticfiles %}
+    <script src="{% static "js/awesomplete.js" %}"></script>
+    <script src="{% static "js/jquery.formset.js" %}"></script>
+    <script src="{% static "js/jquery.cropit.js" %}"></script>
+    <script src="{% static "js/markdownx.js" %}"></script>
+    <script type="text/javascript">
+    $(function() {
+        $('.form-container').formset({
+            prefix: '{{ skill_formset.prefix }}',
+            addText: 'Add Skill',
+            deleteText: 'Remove',
+            addCssClass: 'circle--clone--add',
+            deleteCssClass: 'circle--clone--remove',
+            added: function (row) {
+                Awesomplete.$$('.awesomplete').forEach(function (input) {
+                  new Awesomplete(input, {
+                  });
+                });
+            }
+        });
+    });
+    </script>
+
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static "css/awesomplete.css" %}">
+{#    <link rel="stylesheet" href="{% static "css/markdownx.css" %}">#}
+{% endblock %}

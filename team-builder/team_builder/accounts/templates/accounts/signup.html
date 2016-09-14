@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <div class="bounds">
+    <div class="grid-30 centered">
+      <h2>Sign Up</h2>
+      <form method="POST" action="">
+          {% csrf_token %}
+          {{ form.non_field_errors }}
+          {{ form.full_name.errors }}
+          {{ form.full_name }}
+          {{ form.email.errors }}
+          {{ form.email }}
+          {{ form.password1.errors }}
+          {{ form.password1 }}
+          {{ form.password2.errors }}
+          {{ form.password2 }}
+        <input type="submit" class="button-primary" value="Sign Up">
+        <a class="button" href="{% url 'accounts:sign-in' %}">Sign In</a>
+      </form>
+    </div>
+  </div>
+{% endblock %}

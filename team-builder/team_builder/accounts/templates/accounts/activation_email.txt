@@ -1,0 +1,4 @@
+Dear {{ user.userprofile.full_name }},
+
+please follow the link to activate your account: {{ site }}{% url 'accounts:registration-activate' activation_key=activation_key %}.
+This link will be valid for {{ expiration_days }} days.

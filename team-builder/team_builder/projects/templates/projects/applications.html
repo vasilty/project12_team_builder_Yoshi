@@ -1,0 +1,118 @@
+{% extends "layout.html" %}
+{% load projects_extra %}
+{% load static from staticfiles %}
+
+{% block content %}
+
+  <div class="circle--actions--bar">
+    <nav class="bounds">
+      <ul class="circle--pill--list">
+        <li><a class="selected" href="{% url 'projects:applications' %}">Applications</a></li>
+        <li><a href="{% url 'projects:user-profile-detail' pk=user.userprofile.id %}">Profile</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="bounds circle--page">
+    <div class="circle--page--header grid-100">
+      <h2>Applications</h2>
+    </div>
+
+    <div class="grid-25">
+      <div class="circle--filter circle--secondary--module">
+        <h4>Status</h4>
+        <ul class="circle--filter--list">
+          {% for status in statuses %}
+            {% if status == filtered_status %}
+              <li><a class="selected" href="{% url 'projects:applications' %}{% make_url status=status project=filtered_project position=filtered_position %}">{{ status|title }}</a></li>
+            {% else %}
+              <li><a href="{% url 'projects:applications' %}{% make_url status=status project=filtered_project position=filtered_position %}">{{ status|title }}</a></li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="circle--filter circle--secondary--module">
+        <h4>My Projects</h4>
+        <ul class="circle--filter--list">
+          {% for project in projects %}
+            {% if project == filtered_project %}
+              <li><a class="selected" href="{% url 'projects:applications' %}{% make_url status=filtered_status project=project position=filtered_position %}">{{ project|title }}</a></li>
+            {% else %}
+              <li><a href="{% url 'projects:applications' %}{% make_url status=filtered_status project=project position=filtered_position %}">{{ project|title }}</a></li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="circle--filter circle--secondary--module">
+        <h4>Project Needs</h4>
+        <ul class="circle--filter--list">
+          {% for need in needs %}
+            {% if need == filtered_position %}
+              <li><a class="selected" href="{% url 'projects:applications' %}{% make_url status=filtered_status project=filtered_project position=need %}">{{ need|title }}</a></li>
+            {% else %}
+              <li><a href="{% url 'projects:applications' %}{% make_url status=filtered_status project=filtered_project position=need %}">{{ need|title }}</a></li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="grid-70 grid-push-5">
+      <table class="u-full-width circle--table">
+        <thead>
+          <tr>
+            <th>Applicant</th>
+            <th class="circle--cell--right">Applicant Position</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for application in applications %}
+            <tr class="clickable-row" data-href="{% url 'projects:user-profile-detail' pk=application.applicant.userprofile.pk %}">
+              <td class="application-applicant-project">
+                <h3>{{ application.applicant.userprofile.full_name }}</h3>
+                <p>{{ application.position.project }}</p>
+              </td>
+              <td class="circle--cell--right application-position">
+                <span class="secondary-label">{{ application.position.role }}</span>
+              </td>
+              <td class="nonclickable-cell">
+
+              {% if application.status != 'a' %}
+              <form class="accept-reject-form" action="{% url 'projects:applications-update' status='accept' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{{ application.id }}">
+                <input type="image" class="application-accept-button" src="{% static 'images/accept.svg' %}" height="30px">
+              </form>
+              {% endif %}
+
+              {% if application.status != 'r' %}
+              <form class="accept-reject-form" action="{% url 'projects:applications-update' status='reject' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{{ application.id }}">
+                <input type="image" class="application-reject-button" src="{% static 'images/reject.svg' %}" height="30px">
+              </form>
+              {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+    </div>
+
+  </div>
+{% endblock %}
+
+{% block javascript %}
+{% load static from staticfiles %}
+    <script src="{% static "js/sweetalert.min.js" %}"></script>
+{% endblock %}
+
+{% block css %}
+{% load static from staticfiles %}
+    <link rel="stylesheet" href="{% static "css/sweetalert.css" %}">
+{% endblock %}

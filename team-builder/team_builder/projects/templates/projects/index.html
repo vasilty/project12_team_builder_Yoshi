@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+{% load projects_extra %}
+
+{% block content %}
+  <div class="bounds circle--page">
+    <div class="circle--page--header circle--fluid">
+      <div class="circle--fluid--cell circle--fluid--primary">
+        <h2>Projects{% if fitme %} that fit me{% endif %}</h2>
+      </div>
+      <div class="circle--fluid--cell circle--fluid--secondary">
+        <a class="button button-primary icon-on-left" href="{% url 'projects:project-create' %}">
+          <svg version="1.1"
+               xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 13 13" style="enable-background:new 0 0 13 13;" xml:space="preserve" class="add">
+            <polygon points="7,6 7,0 6,0 6,6 0,6 0,7 6,7 6,13 7,13 7,7 13,7 13,6 "/>
+          </svg>
+          New Project
+        </a>
+      </div>
+    </div>
+
+    <div class="grid-25">
+      <div class="circle--filter circle--secondary--module">
+        {% if not fitme %}
+          <a href="{% url 'projects:project-fitme' %}">Projects that fit me</a>
+        {% endif %}
+        <h4>Project Needs</h4>
+        <ul class="circle--filter--list">
+          {% for need in needs %}
+            {% if need == filtered_position %}
+              <li><a class="selected" href="{% if fitme %}{% url 'projects:project-fitme' %}{% else %}{% url 'projects:home' %}{% endif %}{% make_url q=search_term position=need %}">{{ need|title }}</a></li>
+            {% else %}
+              <li><a href="{% if fitme %}{% url 'projects:project-fitme' %}{% else %}{% url 'projects:home' %}{% endif %}{% make_url q=search_term position=need %}">{{ need|title }}</a></li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-70 grid-push-5">
+      <table class="u-full-width circle--table">
+        <thead>
+          <tr>
+            <th>Project Title</th>
+            <th class="circle--cell--right">Project Needs</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for project in projects %}
+            <tr class="clickable-row" data-href="{% url 'projects:project-detail' pk=project.pk %}">
+              <td>
+                <h3>{{ project.name }}</h3>
+              </td>
+              <td class="circle--cell--right">
+                <span class="secondary-label">
+                    {% for position in project.positions.all %}
+                        {% if forloop.counter < 3 %}<span class="position-list">{{ position.role }}</span>
+                        {% elif forloop.counter == 3 %}<span class="position-list">...</span>{% endif %}
+                    {% endfor %}
+                </span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% if is_paginated %}
+        <div class="pagination">
+          <span class="step-links">
+            {% if page_obj.has_previous %}
+              <a href="?page={{ page_obj.previous_page_number }}"><</a>
+            {% endif %}
+
+            <span class="current">
+              Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+              <a href="?page={{ page_obj.next_page_number }}">></a>
+            {% endif %}
+          </span>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
