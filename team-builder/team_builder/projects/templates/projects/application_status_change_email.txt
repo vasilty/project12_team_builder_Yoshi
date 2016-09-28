@@ -1,0 +1,3 @@
+Hello {{ application.applicant.userprofile.full_name }},
+
+you have been {{ status }}ed for {{ application.position.role.name }} position in the "{{ application.position.project.name }}" project.

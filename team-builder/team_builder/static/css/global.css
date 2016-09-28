@@ -1187,7 +1187,7 @@ pre > code {
 
 /* line 18, ../sass/circle/core/code.sass */
 pre {
-  display: inline;
+  /*display: inline;*/
   font-size: 1.6rem;
   color: #222;
 }
@@ -2161,3 +2161,69 @@ input.cropit-image-input {
   margin-right: 10px;
 }
 
+.flash-message {
+  margin-top: -30px;
+  margin-bottom: 30px;
+  text-align: center;
+  border: 1px solid transparent;
+}
+
+.buttons-row {
+  width: 100%;
+}
+
+.circle--fluid--cell .buttons-in-row {
+  display: inline-block;
+  margin-left: 20px;
+  margin-bottom: 10px;
+}
+
+.thirty-percent-width {
+  width: 30%;
+}
+
+.alert {
+  cursor: pointer;
+  margin-bottom: 0;
+}
+
+.search-form {
+  margin-bottom: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.6;
+}
+
+#lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: none;
+}
+
+#lightbox-div {
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 20px;
+  padding: 30px;
+  width: 50%;
+  background-color: white;
+  text-align: left;
+  overflow-y: auto;
+  height: 90%;
+  /*position: absolute;*/
+}
+
+#close-icon {
+  float: right;
+  cursor: pointer;
+}
+
+#info {
+  cursor: pointer;
+}

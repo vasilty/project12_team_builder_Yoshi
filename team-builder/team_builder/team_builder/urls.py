@@ -19,12 +19,16 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
+from . import views
+
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^markdownx/', include('markdownx.urls')),
     url(r'^accounts/', include('accounts.urls', namespace='accounts')),
+    url(r'^accounts/', include('registration.backends.hmac.urls')),
     url(r'^', include('projects.urls', namespace='projects')),
+    url(r'^$', views.HomeView.as_view()),
 ]
 urlpatterns += staticfiles_urlpatterns()
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

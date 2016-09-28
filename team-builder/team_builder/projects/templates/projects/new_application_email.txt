@@ -1,0 +1,3 @@
+Dear {{ application.position.project.owner.userprofile.full_name }},
+
+{{ application.applicant.userprofile.full_name }} has applied for the {{ application.position.role.name }} position in the "{{ application.position.project.name }}" project.

@@ -5,7 +5,6 @@ from django import forms
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from django.db.models import F
 from django.utils.text import slugify
 
 from markdownx.widgets import MarkdownxWidget
@@ -46,10 +45,10 @@ class SkillField(forms.Field):
     def _remove_duplicates(cls, seq):
         """Remove duplicates in a case insensitive, but case preserving
         manner."""
-        d = {}
+        duplicates = {}
         for item in seq:
-            if item.lower() not in d:
-                d[item.lower()] = True
+            if item.lower() not in duplicates:
+                duplicates[item.lower()] = True
                 yield item
 
 
@@ -114,7 +113,7 @@ class PositionForm(forms.ModelForm):
             self.cleaned_data['related_skills'] = data
 
         if 'role_name' in self.cleaned_data and (
-                    'role_name' in self.changed_data):
+                'role_name' in self.changed_data):
             value = self.cleaned_data['role_name']
             role, created = models.Role.objects.get_or_create(
                 name__iexact=value,
@@ -127,13 +126,37 @@ class PositionForm(forms.ModelForm):
         return super(PositionForm, self).save(commit)
 
 
+class BaseProjectFormset(forms.BaseInlineFormSet):
+    """Project Inline Formset."""
+    def clean(self):
+        """Adds validation that each input skills are unique."""
+        if any(self.errors):
+            # Don't bother validating the formset unless each form is valid
+            # on its own
+            return
+
+        forms_with_data = 0
+
+        for form in self.forms:
+            if form.cleaned_data:
+                forms_with_data += 1
+
+        # If all forms with data were marked as deleted, raise an error
+        if len(self.deleted_forms) == forms_with_data:
+            raise forms.ValidationError(
+                'Project must have at least one position.')
+
+
 ProjectFormSet = forms.inlineformset_factory(
     models.Project,
     models.Position,
     form=PositionForm,
-    extra=1,
+    formset=BaseProjectFormset,
+    extra=0,
     max_num=10,
     min_num=1,
+    validate_min=True,
+    validate_max=True,
 )
 
 
@@ -215,7 +238,7 @@ class UserProfileSkillForm(forms.ModelForm):
         Position. If not the case, delete the old Skill object.
         """
         if 'skill_name' in self.cleaned_data and (
-                    'skill_name' in self.changed_data):
+                'skill_name' in self.changed_data):
             value = self.cleaned_data['skill_name']
             skill, created = models.Skill.objects.get_or_create(
                 name__iexact=value,
@@ -230,6 +253,7 @@ class UserProfileSkillForm(forms.ModelForm):
 
 
 class BaseUserProfileSkillFormset(forms.BaseInlineFormSet):
+    """"UserProfileSkill Inline Formset."""
     def clean(self):
         """Adds validation that each input skills are unique."""
         if any(self.errors):
@@ -258,6 +282,23 @@ UserProfileSkillFormSet = forms.inlineformset_factory(
 
 
 class ApplicationForm(forms.ModelForm):
+    """Form to create an application."""
     class Meta:
         model = models.Application
         fields = ('position',)
+
+    def __init__(self, request=None, *args, **kwargs):
+        self.request = request
+        super(ApplicationForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        position = self.cleaned_data['position']
+        # If an application for this position from this user already exists
+        if models.Application.objects.filter(
+                applicant=self.request.user,
+                position=position
+        ).exists():
+            # Raise an error
+            raise forms.ValidationError(
+                'You have already applied for this position.')
+        return self.cleaned_data

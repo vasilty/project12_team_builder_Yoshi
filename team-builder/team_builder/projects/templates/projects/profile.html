@@ -40,13 +40,19 @@
           </tr>
         </thead>
         <tbody>
-          <tr class="clickable-row" data-href="project.html">
-            {% for past_position in past_positions %}
+          {% for past_project in past_projects %}
+            <tr class="clickable-row" data-href="{% url 'projects:project-detail' pk=past_project.pk %}">
               <td>
-                <h3>{{ past_position.project.name }}</h3>
+                <h3>{{ past_project.name }}</h3>
               </td>
               <td class="circle--cell--right">
-                <span class="secondary-label">{{ past_position.role.name }}</span>
+                {% for position in past_project.positions.all %}
+                  <span class="secondary-label">
+                    {% if position.user == userprofile.user %}
+                      <span class="position-list">{{ position.role.name }}</span>
+                    {% endif %}
+                  </span>
+                {% endfor %}
               </td>
             </tr>
           {% endfor %}

@@ -82,7 +82,7 @@
               <td class="nonclickable-cell">
 
               {% if application.status != 'a' %}
-              <form class="accept-reject-form" action="{% url 'projects:applications-update' status='accept' %}" method="POST">
+              <form class="accept-reject-form" action="{% url 'projects:applications-update' status='accept' %}{% make_url status=filtered_status project=filtered_project position=filtered_position %}" method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="id" value="{{ application.id }}">
                 <input type="image" class="application-accept-button" src="{% static 'images/accept.svg' %}" height="30px">
@@ -90,7 +90,7 @@
               {% endif %}
 
               {% if application.status != 'r' %}
-              <form class="accept-reject-form" action="{% url 'projects:applications-update' status='reject' %}" method="POST">
+              <form class="accept-reject-form" action="{% url 'projects:applications-update' status='reject' %}{% make_url status=filtered_status project=filtered_project position=filtered_position %}" method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="id" value="{{ application.id }}">
                 <input type="image" class="application-reject-button" src="{% static 'images/reject.svg' %}" height="30px">
@@ -101,10 +101,27 @@
           {% endfor %}
         </tbody>
       </table>
+      {% if is_paginated %}
+        <div class="pagination">
+          <span class="step-links">
+            {% if page_obj.has_previous %}
+              <a href="?page={{ page_obj.previous_page_number }}"><</a>
+            {% endif %}
+
+            <span class="current">
+              Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+              <a href="?page={{ page_obj.next_page_number }}">></a>
+            {% endif %}
+          </span>
+        </div>
+      {% endif %}
 
     </div>
-
   </div>
+
 {% endblock %}
 
 {% block javascript %}

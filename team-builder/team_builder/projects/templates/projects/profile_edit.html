@@ -7,8 +7,8 @@
   <div class="circle--actions--bar">
     <nav class="bounds">
       <ul class="circle--pill--list">
-        <li><a href="applications.html">Applications</a></li>
-        <li><a class="selected" href="profile.html">Profile</a></li>
+        <li><a href="{% url 'projects:applications' %}">Applications</a></li>
+        <li><a class="selected" href="{% url 'projects:user-profile-detail' pk=user.userprofile.id %}">Profile</a></li>
       </ul>
     </nav>
   </div>
@@ -31,6 +31,7 @@
           {{ form.full_name }}
           <div class="circle--article--body">
             {{ form.biography.errors }}
+             <img height="20px" src="{% static 'images/info.svg' %}" id="info">
             {{ form.biography }}
           </div>
 
@@ -43,24 +44,25 @@
               </tr>
             </thead>
             <tbody>
-              <tr class="clickable-row" data-href="project.html">
-                <td>
-                  <h3>Invoice Delivery Tool</h3>
-                </td>
-                <td class="circle--cell--right">
-                  <span class="secondary-label">Rails Developer</span>
-                </td>
-              </tr>
-              <tr class="clickable-row" data-href="project.html">
-                <td>
-                  <h3>Twitter Client</h3>
-                </td>
-                <td class="circle--cell--right">
-                  <span class="secondary-label">Designer</span>
-                </td>
-              </tr>
+              {% for past_project in past_projects %}
+                <tr class="clickable-row" data-href="{% url 'projects:project-detail' pk=past_project.pk %}">
+                  <td>
+                    <h3>{{ past_project.name }}</h3>
+                  </td>
+                  <td class="circle--cell--right">
+                    {% for position in past_project.positions.all %}
+                      <span class="secondary-label">
+                        {% if position.user == userprofile.user %}
+                          <span class="position-list">{{ position.role.name }}</span>
+                        {% endif %}
+                      </span>
+                    {% endfor %}
+                  </td>
+                </tr>
+              {% endfor %}
             </tbody>
           </table>
+
         </div>
 
         <div class="grid-25 grid-push-5">
@@ -118,8 +120,27 @@
     </form>
   </div>
 
-  {% awesomplete_list %}
-
+  {% awesomplete_list_skills %}
+  <div id="lightbox">
+{#  </div>#}
+    <div id="lightbox-div">
+        <img id="close-icon" src="{% static 'images/close.svg' %}">
+        <h2>Markdown Cheatsheet</h2>
+        <p>Markdown is a short-hand syntax for easily converting text to HTML. For more examples and a detailed overview see <a href="http://daringfireball.net/projects/markdown/basics" target="_blank">Markdown Basics</a></p>
+        <h4>Links</h4>
+        <p>This is a link to Wikipedia [Wikipedia](http://en.wikipedia.org/wiki/Markdown)</p>
+        <h4>Code</h4>
+        <p>Wrap your code with four spaces.</p>
+        <h4>Italic</h4>
+        <p>Here's a word that is *emphasized*.</p>
+        <h4>Bold</h4>
+        <p>Here's a word that is **bold**.</p>
+        <h4>Images</h4>
+        <p>Drag and drop chosen images to the textfield.</p>
+        <h4>List</h4>
+        <p> * list item</p>
+    </div>
+  </div>
     <script>
       $('.edit-avatar').on('click', function () {
           $('.edit-avatar').hide();

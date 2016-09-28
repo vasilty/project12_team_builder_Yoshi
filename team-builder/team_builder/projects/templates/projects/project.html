@@ -19,9 +19,10 @@
         <h4 class="circle--article--section">Project</h4>
         <h1 class="circle--article--title">{{ project.name }}</h1>
         <p class="circle--article--byline">Project Owner:
-            <a href="{% url 'projects:user-profile-detail' pk=project.owner_id %}">
+          <a href="{% url 'projects:user-profile-detail' pk=project.owner_id %}">
             {{ project.owner.userprofile.full_name|default:"Owner's Profile" }}
-        </a></p>
+          </a>
+        </p>
       </div>
 
       <div class="circle--article--body">

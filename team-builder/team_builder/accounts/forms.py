@@ -6,10 +6,7 @@ from registration.forms import RegistrationFormUniqueEmail
 
 
 class CustomAuthenticationForm(forms.ModelForm):
-    """
-    Base class for authenticating users. Extend this to get a form that accepts
-    username/password logins.
-    """
+    """Form for authenticating users."""
     class Meta:
         model = get_user_model()
         fields = ('email', 'password',)
@@ -31,10 +28,6 @@ class CustomAuthenticationForm(forms.ModelForm):
     }
 
     def __init__(self, request=None, *args, **kwargs):
-        """
-        The 'request' parameter is set for custom auth use by subclasses.
-        The form data comes in via the standard 'data' kwarg.
-        """
         self.request = request
         self.user_cache = None
         super(CustomAuthenticationForm, self).__init__(*args, **kwargs)
@@ -72,6 +65,7 @@ class CustomAuthenticationForm(forms.ModelForm):
 
 
 class CustomRegistrationForm(RegistrationFormUniqueEmail):
+    """Form for user registration."""
     email = forms.EmailField(
         required=True,
         widget=forms.EmailInput(attrs={'placeholder': 'Email Address'})

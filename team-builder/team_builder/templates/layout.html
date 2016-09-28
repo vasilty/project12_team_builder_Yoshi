@@ -20,18 +20,33 @@
   <link href='https://fonts.googleapis.com/css?family=Work+Sans:400,500' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Cousine' rel='stylesheet' type='text/css'>
 
+
+
+
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   {%  block css %}{% endblock %}
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
   <link rel="stylesheet" href="{% static "css/global.css" %}">
 
   <!-- JS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+
+  <script src="//js.pusher.com/3.1/pusher.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
   <script type="text/javascript" src="{% static "js/autogrow.js" %}"></script>
   <script type="text/javascript" src="{% static "js/global.js" %}"></script>
   {% block javascript %}{% endblock %}
-
 
 </head>
 <body>
@@ -43,7 +58,7 @@
         </div>
         <div class="circle--fluid--cell circle--fluid--primary">
           <div class="circle--search">
-            <form action="{% url 'projects:search' %}" method="GET">
+            <form class="search-form" action="{% url 'projects:search' %}" method="GET">
               <input type="text" placeholder="Search Projects..." name="q" value="{{ search_term }}" />
               <button>
                 <svg version="1.1" class="search" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 12 12" xml:space="preserve">
@@ -73,13 +88,19 @@
   </header>
 
   {% if messages %}
-    <ul class="messages centered grid-50">
+    <div class="flash-message">
       {% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        <div{% if message.tags %} class="alert alert-{{ message.tags }}"{% endif %}>{{ message }}</div>
       {% endfor %}
-    </ul>
+    </div>
   {% endif %}
   {% block content %}{% endblock %}
+
+
+  <script>
+    var userId = {{ user.id|default:0 }};
+  </script>
+
 
 </body>
 </html>

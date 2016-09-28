@@ -1,0 +1,1 @@
+You have been {{ status }}ed for a {{ application.position.role.name }} position in the "{{ application.position.project.name }}" project.

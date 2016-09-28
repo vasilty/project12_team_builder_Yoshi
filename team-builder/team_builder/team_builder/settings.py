@@ -140,16 +140,20 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
 MEDIA_URL = '/uploads/'
 
-MARKDOWNX_MARKDOWNIFY_FUNCTION = 'team_builder.utils.markdownify'
-
-MARKDOWNX_IMAGE_MAX_SIZE = {'size': (200, 200), 'quality': 90,} # Different options describing final image
+MARKDOWNX_MARKDOWNIFY_FUNCTION = 'projects.utils.markdownify'
+MARKDOWNX_IMAGE_MAX_SIZE = {'size': (200, 200), 'quality': 90,}
 
 ACCOUNT_ACTIVATION_DAYS = 7
 REGISTRATION_OPEN = True
 REGISTRATION_SALT = 'rgrimdwor'
 
-EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'yourusername@gmail.com'
-EMAIL_HOST_PASSWORD = 'yourpassword'
-EMAIL_PORT = 587
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+
+USE_PUSHER = False
+
+# needed to make this work with bootstrap labels
+from django.contrib.messages import constants as messages
+MESSAGE_TAGS = {
+    messages.ERROR: 'danger'
+}

@@ -1,9 +1,9 @@
 import bleach
 from django import template
 from django.conf import settings
-import markdown2
 
 from projects import models
+from projects import utils
 
 register = template.Library()
 
@@ -23,36 +23,28 @@ def qs_to_string(qs):
 
 @register.filter('markdownify')
 def markdownify(content):
-    attrs = {
-        '*': ['class'],
-        'a': ['href', 'rel'],
-        'img': ['alt', 'src'],
-    }
-    return bleach.clean(markdown2.markdown(content), attributes=attrs)
+    """Render Markdown formatted text."""
+    return utils.markdownify(content)
 
 
-@register.inclusion_tag('projects/awesomplete_list.html')
-def awesomplete_list():
-    """Creates a list of options for awesomplete input."""
-    skills = models.Skill.objects.all().values_list('name', flat=True)
+@register.inclusion_tag('projects/awesomplete_list_roles.html')
+def awesomplete_list_roles():
+    """Creates a list of roles as options for awesomplete input."""
     roles = models.Role.objects.all().values_list('name', flat=True)
-    return {'skills': skills, 'roles': roles}
+    return {'roles': roles}
+
+
+@register.inclusion_tag('projects/awesomplete_list_skills.html')
+def awesomplete_list_skills():
+    """Creates a list of skills as options for awesomplete input."""
+    skills = models.Skill.objects.all().values_list('name', flat=True)
+    return {'skills': skills}
 
 
 @register.simple_tag
 def make_url(**kwargs):
     """Makes GET query to search by whatever kwargs are passed."""
-    alls = ['all needs', 'all applications', 'all projects']
-    url = ''
-    for key, value in kwargs.items():
-        if value and value not in alls:
-            value = value.lower()
-            if not url:
-                url += '?'
-            else:
-                url += '&'
-            url += key + '=' + value
-    return url
+    return utils.make_url(**kwargs)
 
 
 @register.simple_tag

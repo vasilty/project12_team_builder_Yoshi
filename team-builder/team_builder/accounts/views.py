@@ -1,16 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.core.urlresolvers import reverse_lazy
-from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
-from django.views.generic import TemplateView
-from django.views.generic.edit import FormView, View
+from django.views.generic import RedirectView
+from django.views.generic.edit import FormView
 
 from braces.views import LoginRequiredMixin
-
-from registration import signals
-from registration.backends.hmac.views import (RegistrationView,
-                                              ActivationView)
+from registration.backends.hmac.views import RegistrationView, ActivationView
+from registration.signals import user_activated
 
 from . import forms
 
@@ -22,35 +18,26 @@ class SignInView(FormView):
     success_url = reverse_lazy('projects:home')
 
     def form_valid(self, form):
-        # form.send_email()
         messages.success(self.request, "You've been successfully logged in!")
         login(self.request, form.user_cache)
         return super(SignInView, self).form_valid(form)
 
 
-class SignOutView(LoginRequiredMixin, View):
+class SignOutView(LoginRequiredMixin, RedirectView):
     """Sign out view."""
-    success_url = reverse_lazy('projects:home')
+    url = reverse_lazy('projects:home')
     login_url = reverse_lazy('accounts:sign-in')
 
     def get(self, request):
         logout(request)
         messages.success(self.request, "You've been successfully logged out!")
-        return HttpResponseRedirect(self.success_url)
-
-
-class RegistrationCompleteView(TemplateView):
-    template_name = 'accounts/registration_complete.html'
+        return super(SignOutView, self).get(request)
 
 
 class SignUpView(RegistrationView):
+    """Sign up view."""
     form_class = forms.CustomRegistrationForm
     template_name = 'accounts/signup.html'
-    email_body_template = 'accounts/activation_email.txt'
-    email_subject_template = 'accounts/activation_email_subject.txt'
-
-    def get_success_url(self, user):
-        return reverse_lazy('accounts:registration-complete')
 
     def get_form_class(self):
         return forms.CustomRegistrationForm
@@ -59,7 +46,7 @@ class SignUpView(RegistrationView):
         """
         Create the inactive user account and send an email containing
         activation instructions.
-        Save user's email to UserProfile.
+        Save user's full name to UserProfile.
         """
         new_user = form.save(commit=False)
         new_user.is_active = False
@@ -74,38 +61,18 @@ class SignUpView(RegistrationView):
 
 
 class AccountActivateView(ActivationView):
-    template_name = 'accounts/registration_activate.html'
-
+    """Account activation view."""
     def get_success_url(self, user):
-        return reverse_lazy('accounts:sign-in')
-
-    def get(self, *args, **kwargs):
-        """
-        The base activation logic; subclasses should leave this method
-        alone and implement activate(), which is called from this
-        method.
-        """
-        activated_user = self.activate(*args, **kwargs)
-        if activated_user:
-            signals.user_activated.send(
-                sender=self.__class__,
-                user=activated_user,
-                request=self.request
-            )
-            success_url = self.get_success_url(activated_user)
-            try:
-                to, args, kwargs = success_url
-                messages.success(self.request,
-                                 ('Your account has been successfully'
-                                  ' activated.'))
-                return redirect(to, *args, **kwargs)
-            except ValueError:
-                messages.success(self.request,
-                                 ('Your account has been successfully'
-                                  ' activated.'))
-                return redirect(success_url)
-        return super(AccountActivateView, self).get(*args, **kwargs)
+        return reverse_lazy('projects:user-profile-update')
 
 
-class AccountActivationCompleteView(TemplateView):
-    template_name = 'accounts/registration_activation_complete.html'
+def login_and_flash_messages(**kwargs):
+    """Login user and send success flash messages."""
+    request = kwargs.get('request')
+    user = kwargs.get('user')
+    login(request, user)
+    messages.success(request,
+                     'You have successfully registered and logged in.')
+    messages.success(request, 'Tell us a little bit about yourself.')
+
+user_activated.connect(login_and_flash_messages)

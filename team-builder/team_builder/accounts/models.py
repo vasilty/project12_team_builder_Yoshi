@@ -5,10 +5,9 @@ from django.db import models
 
 
 class MyUserManager(BaseUserManager):
+    """Custom user manager."""
     def _create_user(self, email, password, **extra_fields):
-        """
-        Creates and saves a User with the given email and password.
-        """
+        """Creates and saves a User with the given email and password."""
         if not email:
             raise ValueError('The given email must be set')
         email = self.normalize_email(email)
@@ -18,11 +17,13 @@ class MyUserManager(BaseUserManager):
         return user
 
     def create_user(self, email, password=None, **extra_fields):
+        """Creates an ordinary user."""
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
         return self._create_user(email, password, **extra_fields)
 
     def create_superuser(self, email, password, **extra_fields):
+        """Creates a superuser."""
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
@@ -35,19 +36,25 @@ class MyUserManager(BaseUserManager):
 
 
 class MyUser(AbstractBaseUser, PermissionsMixin):
+    """Custom User model with email as a unique field used for authentication.
+    """
     email = models.EmailField(unique=True)
-    password = models.CharField(max_length=255)
+    password = models.CharField(max_length=40)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
     objects = MyUserManager()
 
     USERNAME_FIELD = 'email'
 
     def get_short_name(self):
-        return self.email.split('@')[0]
+        """Gets a short name (derived form email)."""
+        return str(self.email).split('@')[0]
+
+    def get_full_name(self):
+        """Gets a long name (derived form email)."""
+        return str(self.email).split('@')[0]
 
     def email_user(self, subject, message, from_email=None, **kwargs):
-        """
-        Sends an email to this User.
-        """
+        """Sends an email to this User."""
         send_mail(subject, message, from_email, [self.email], **kwargs)

@@ -34,6 +34,7 @@ class Project(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
                               on_delete=models.CASCADE,
                               related_name='projects')
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
@@ -170,7 +171,7 @@ pre_delete.connect(cascade_delete_position, sender=Position)
 
 
 def cascade_delete_project(sender, instance, **kwargs):
-    # Delete images from Markdown description field.
+    """Delete images from Markdown description field."""
     pattern = r'!\[\]\((?P<file>[-\w/.]+)\)'
     files = re.findall(pattern, sender.objects.get(id=instance.id).description)
     for file in files:
@@ -193,9 +194,10 @@ def manage_markup_images(sender, instance, **kwargs):
         new_files = re.findall(pattern, instance.biography)
     else:
         if instance.id:
-            old_files = re.findall(pattern,
-                               sender.objects.get(
-                                   id=instance.id).description)
+            old_files = re.findall(
+                pattern,
+                sender.objects.get(id=instance.id).description
+            )
         new_files = re.findall(pattern, instance.description)
     files_to_delete = [file for file in old_files if file not in new_files]
     for file in files_to_delete:

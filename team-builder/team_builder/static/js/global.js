@@ -56,7 +56,6 @@ $( document ).ready(function() {
     return "<a class='button " + state + "'>" + text + "</div>";
   });
 
-
   // Get CSRF token
   function getCookie(name) {
       var cookieValue = null;
@@ -80,13 +79,14 @@ $( document ).ready(function() {
       return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
   }
 
-
-  // Delete project confirmation
+  // Confirmation for project deletion
   $("#delete-project-button").on('click', function () {
       event.preventDefault();
-
+      var project = $('.circle--article--title').text();
+      console.log(project);
       swal({
-          title: "Are you sure you want to delete this project?",
+          title: "Are you sure?",
+          text: 'You are going to delete the "' + project + '" project.',
           type: "warning",
           showCancelButton: true,
           confirmButtonText: "Delete",
@@ -112,19 +112,19 @@ $( document ).ready(function() {
       )
   });
 
-  // Applicantion accept confirmation
+  // Confirmation for application status change
   $(".application-accept-button, .application-reject-button").on('click', function (event) {
       event.preventDefault();
       var form = $(this).parent();
-      var id = form.children('input[name="id"]').val();
       var href = form.attr('action');
-      var action = href.split('/');
+      var action = href.split('?');
+      action = action[0];
+      action = action.split('/');
       action = action[action.length-1];
       var applicant = form.parent().siblings('.application-applicant-project').children('h3').text();
       var project = form.parent().siblings('.application-applicant-project').children('p').text();
       var position = form.parent().siblings('.application-position').children('span').text();
-      var explanation = "You are going to " + action + ' ' + applicant + " for a " +
-              position + ' position in the ' + '"' + project + '"' + ' project?';
+      var explanation = "You are going to " + action + ' ' + applicant + " for a " + position + ' position in the ' + '"' + project + '"' + '.';
       swal({
           title: "Are you sure?" ,
           text: explanation,
@@ -136,21 +136,74 @@ $( document ).ready(function() {
           allowOutsideClick: true
           },
           function () {
-              $.ajaxSetup({
-                  beforeSend: function(xhr, settings) {
-                      if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                          xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                      }
-                  }
-              });
-
-              $.post(href, {'id': id}, function() {
-                  location.reload();
-              }).fail(function() {
-                  console.log('error');
-              });
+              form.submit();
           }.bind(this)
       );
   });
+
+  // Hide flash message on click
+  $('.alert').on('click', function(){
+      $(this).hide("slow");
+  });
+
+  function notifyMe(title, message) {
+      // Let's check if the browser supports notifications
+      if (!("Notification" in window)) {
+        alert("This browser does not support desktop notification");
+      }
+
+      // Let's check whether notification permissions have already been granted
+      else if (Notification.permission === "granted") {
+        // If it's okay let's create a notification
+        var notification = new Notification(title, {
+              body: message
+              });
+      }
+
+      // Otherwise, we need to ask the user for permission
+      else if (Notification.permission !== 'denied') {
+        Notification.requestPermission(function (permission) {
+          // If the user accepts, let's create a notification
+          if (permission === "granted") {
+            var notification = new Notification(title, {
+              body: message
+              });
+          }
+        });
+      }
+
+      // At last, if the user has denied notifications, and you
+      // want to be respectful there is no need to bother them any more.
+  }
+
+  // Show push notification to users
+  function pusher(userId) {
+    // Pusher related code
+    var pusher = new Pusher('c2eac3b62fd45a991432', {
+      cluster: 'eu'
+    });
+    var notificationsChannel = pusher.subscribe('team-builder-' + userId);
+
+    notificationsChannel.bind('new_notification', function(notification) {
+      var title = notification.title;
+      var message = notification.message;
+      notifyMe(title, message);
+    });
+  }
+  if (userId) {pusher(userId)}
+
+
+    $("#info").hover(function() {
+        $(this).attr('title', 'Markdown formatting can be used for this field.');
+    });
+
+    $("#info").on('click', function() {
+        $('#lightbox').show();
+    });
+
+    $('#close-icon').on('click', function(e){
+        $('#lightbox').hide();
+    });
+
 
 });
