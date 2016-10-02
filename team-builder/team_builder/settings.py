@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'markdownx',
     'pusherable',
     'debug_toolbar',
+    'storages',
     'accounts',
     'projects',
 ]
@@ -172,3 +173,8 @@ from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
     messages.ERROR: 'danger'
 }
+
+try:
+    from team_builder.local_settings import *
+except ImportError:
+    pass
