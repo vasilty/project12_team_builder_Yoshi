@@ -8,7 +8,7 @@ django-braces==1.9.0
 django-debug-toolbar==1.5
 django-markdownx==1.6.3
 django-pusherable==0.1.0
-django-registration==2.1.2
+django-registration==3.1.2
 flake8==3.0.4
 gunicorn==19.6.0
 html5lib==0.9999999
