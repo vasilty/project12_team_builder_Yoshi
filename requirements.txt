@@ -5,7 +5,7 @@ coverage==4.2
 cryptography==1.5
 Django==1.10.1
 django-braces==1.9.0
-django-debug-toolbar==1.5
+django-debug-toolbar==1.11.1
 django-markdownx==1.6.3
 django-pusherable==0.1.0
 django-registration==2.1.2
